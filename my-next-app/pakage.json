@@ -1,0 +1,14 @@
+{ "name": "my-next-app", "version": "1.0.0", 
+  "description": "A Node.js application for 
+  managing tasks with MySQL integration.", 
+  "main": "index.js", "scripts": {
+    "start": "node index.js", "dev": "nodemon 
+    index.js"
+  },
+  "dependencies": { "express": "^4.21.1", 
+    "mysql2": "^3.11.4", "dotenv": "^16.4.5"
+  },
+  "devDependencies": { "nodemon": "^3.1.7"
+  },
+  "author": "mohsen", "license": "ISC"
+}

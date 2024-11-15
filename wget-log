@@ -1,0 +1,31 @@
+--2024-11-09 22:35:35--  http://www.fpdf.org/en/dl.php?f=fpdf.zip
+Resolving www.fpdf.org (www.fpdf.org)... 213.186.33.106
+Connecting to www.fpdf.org (www.fpdf.org)|213.186.33.106|:80... failed: Connection timed out.
+Retrying.
+
+--2024-11-09 22:37:48--  (try: 2)  http://www.fpdf.org/en/dl.php?f=fpdf.zip
+Connecting to www.fpdf.org (www.fpdf.org)|213.186.33.106|:80... failed: Connection timed out.
+Retrying.
+
+--2024-11-09 22:40:01--  (try: 3)  http://www.fpdf.org/en/dl.php?f=fpdf.zip
+Connecting to www.fpdf.org (www.fpdf.org)|213.186.33.106|:80... failed: Connection timed out.
+Retrying.
+
+--2024-11-09 22:42:15--  (try: 4)  http://www.fpdf.org/en/dl.php?f=fpdf.zip
+Connecting to www.fpdf.org (www.fpdf.org)|213.186.33.106|:80... failed: Connection timed out.
+Retrying.
+
+--2024-11-09 22:44:29--  (try: 5)  http://www.fpdf.org/en/dl.php?f=fpdf.zip
+Connecting to www.fpdf.org (www.fpdf.org)|213.186.33.106|:80... failed: Connection timed out.
+Retrying.
+
+--2024-11-09 22:46:45--  (try: 6)  http://www.fpdf.org/en/dl.php?f=fpdf.zip
+Connecting to www.fpdf.org (www.fpdf.org)|213.186.33.106|:80... failed: Connection timed out.
+Retrying.
+
+--2024-11-09 22:49:01--  (try: 7)  http://www.fpdf.org/en/dl.php?f=fpdf.zip
+Connecting to www.fpdf.org (www.fpdf.org)|213.186.33.106|:80... failed: Connection timed out.
+Retrying.
+
+--2024-11-09 22:51:17--  (try: 8)  http://www.fpdf.org/en/dl.php?f=fpdf.zip
+Connecting to www.fpdf.org (www.fpdf.org)|213.186.33.106|:80... 
