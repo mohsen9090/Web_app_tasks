@@ -40,8 +40,9 @@ $errorMessage = ''; $successMessage = ''; if
                 $stmt->store_result(); if 
                 ($stmt->num_rows > 0) {
                     $errorMessage = "This UID is 
-                    already taken. Please choose 
-                    another one.";
+                    already taken. Please just 
+                    choose another number (just 
+                    number).";
                 } else {
                     $stmt = 
                     $conn->prepare("INSERT INTO 
@@ -86,7 +87,7 @@ $errorMessage = ''; $successMessage = ''; if
                 dashboard..."; echo 
                 "<script>setTimeout(function() { 
                 window.location.href = 
-                'https://code2024.net/Test/index.php'; 
+                'https://code2024.net/Test/index.php';
                 }, 3000);</script>";
             } else {
                 $errorMessage = "Invalid 
@@ -147,7 +148,7 @@ lang="en"> <head>
             border-radius: 5px; cursor: pointer; 
             transition: background-color 0.3s;
         }
-        .button:hover { background-color: 
+        .button:hover { background-color:
             #dc3545;
         }
         .error { color: #dc3545; font-weight: 
@@ -217,14 +218,14 @@ lang="en"> <head>
             class='error'>$errorMessage</p>"; } 
             ?> <?php if ($successMessage) { echo 
             "<p 
-            class='success'>$successMessage</p>"; 
+            class='success'>$successMessage</p>";
             } ?>
         </div> </div> <?php if ($successMessage 
     && isset($_POST['action']) && 
     $_POST['action'] == 'login') { ?>
         <script> setTimeout(function() { 
                 window.location.href = 
-                "https://code2024.net/Test/index.php"; 
+                "https://code2024.net/Test/index.php";
                 // URL to redirect after login
             }, 3000); // 3 seconds delay
         </script> <?php } ?> </body>
