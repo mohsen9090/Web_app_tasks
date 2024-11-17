@@ -1,34 +1,34 @@
 <?php
-‎// فعال‌سازی نمایش خطا 
-‎// برای دیباگ
+// فعال‌سازی نمایش خطا 
+// برای دیباگ
 error_reporting(E_ALL); ini_set('display_errors', 
 1); session_start();
-‎// بررسی اینکه کاربر وارد 
-‎// شده است
+// بررسی اینکه کاربر وارد 
+// شده است
 if (!isset($_SESSION['user_uid'])) { die("You 
     need to be logged in to view this page.");
 }
-‎// اطلاعات اتصال به 
-‎// پایگاه داده
+// اطلاعات اتصال به 
+// پایگاه داده
 $servername = "gold24.io"; $username = 
 "new_gigar"; $password = "new_chatgpt"; $dbname = 
 "accounting_db";
-‎// ایجاد اتصال به پایگاه 
-‎// داده
+// ایجاد اتصال به پایگاه 
+// داده
 $conn = new mysqli($servername, $username, 
 $password, $dbname);
-‎// بررسی اتصال به پایگاه 
-‎// داده
+// بررسی اتصال به پایگاه 
+// داده
 if ($conn->connect_error) { die("Connection 
     failed: " . $conn->connect_error);
 }
-‎// دریافت UID کاربر از سشن
+// دریافت UID کاربر از سشن
 $uid = $_SESSION['user_uid'];
-‎// عملیات مربوط به 
-‎// اضافه کردن، ویرایش و 
-‎// حذف وظیفه‌ها
+// عملیات مربوط به 
+// اضافه کردن، ویرایش و 
+// حذف وظایف
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-‎    // افزودن وظیفه جدید
+    // افزودن وظیفه جدید
     if (isset($_POST['add_task'])) { 
         $task_description = 
         $_POST['task_description']; $priority = 
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $conn->error;
         }
     }
-‎    // ویرایش وظیفه
+    // ویرایش وظیفه
     if (isset($_POST['edit_task'])) { $task_id = 
         $_POST['task_id']; $task_description = 
         $_POST['task_description']; $priority = 
@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $conn->error;
         }
     }
-‎    // حذف وظیفه
+    // حذف وظیفه
     if (isset($_POST['delete_task'])) { $task_id 
         = $_POST['task_id']; $query = "DELETE 
         FROM tasks WHERE id = ?"; $stmt = 
@@ -85,20 +85,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
 }
-‎// گرفتن وظیفه‌ها 
-‎// برای کاربر با UID مشخص
+// گرفتن وظیفه‌ها 
+// برای کاربر با UID مشخص
 $query = "SELECT * FROM tasks WHERE uid = ?"; 
 $stmt = $conn->prepare($query); 
 $stmt->bind_param("s", $uid); $stmt->execute(); 
 $result = $stmt->get_result(); $tasks = 
 $result->fetch_all(MYSQLI_ASSOC);
-‎// بسته شدن اتصال
+// بسته شدن اتصال
 $stmt->close(); $conn->close(); ?> <!DOCTYPE 
 html> <html lang="fa"> <head>
     <meta charset="UTF-8"> <meta name="viewport" 
     content="width=device-width, 
     initial-scale=1.0"> <title>مدیریت 
-‎    وظیفه‌ها</title> <style>
+    وظیفه‌ها</title> <style>
+        /* استایل‌های CSS */ 
         body { font-family: 'Arial', sans-serif; 
         background-color: #f4f7fc; margin: 0; 
         padding: 20px; color: #333; } h1 { 
@@ -125,34 +126,32 @@ html> <html lang="fa"> <head>
         .edit-btn:hover { background-color: 
         #218838; }
     </style> </head> <body> <h1>مدیریت 
-‎    وظیفه‌ها</h1> 
+    وظیفه‌ها</h1> 
     <h2>وظیفه‌های شما</h2> 
     <table>
         <tr> <th>ID</th> <th>توضیحات 
-‎            وظیفه</th> 
+            وظیفه</th> 
             <th>اولویت</th> 
             <th>وضعیت</th> <th>تاریخ 
-‎            ایجاد</th> 
+            ایجاد</th> 
             <th>عملیات</th>
         </tr> <?php if (!empty($tasks)): ?> <?php 
             foreach ($tasks as $task): ?>
                 <tr> <td><?php echo 
                     htmlspecialchars($task['id']); 
                     ?></td> <td><?php echo 
-                    htmlspecialchars($task['task_descript
-ion']); 
+                    htmlspecialchars($task['task_description']); 
                     ?></td> <td><?php echo 
                     htmlspecialchars($task['priority']); 
                     ?></td> <td><?php echo 
                     htmlspecialchars($task['status']); 
                     ?></td> <td><?php echo 
                     isset($task['created_at']) ? 
-                    htmlspecialchars($task['created_at'])
- 
+                    htmlspecialchars($task['created_at']) 
                     : 'N/A'; ?></td>
                     <td> <!-- Edit Button --> 
                         <form method="post" 
-                        action="">
+                        style="display:inline-block;">
                             <input type="hidden" 
                             name="task_id" 
                             value="<?php echo 
@@ -160,7 +159,7 @@ ion']);
                             <input type="text" 
                             name="task_description" 
                             value="<?php echo 
-                            $task['task_description']; 
+                            htmlspecialchars($task['task_description']); 
                             ?>" required> <input 
                             type="number" 
                             name="priority" 
@@ -175,35 +174,34 @@ ion']);
                                 ($task['status'] 
                                 == 'pending' ? 
                                 'selected' : ''); 
-‎                                ?>>در 
-‎                                انتظار</option> 
+                                ?>>در 
+                                انتظار</option> 
                                 <option 
                                 value="in-progress" 
                                 <?php echo 
                                 ($task['status'] 
                                 == 'in-progress' 
                                 ? 'selected' : 
-‎                                ''); ?>>در 
-‎                                حال 
-‎                                انجام</option> 
+                                ''); ?>>در 
+                                حال 
+                                انجام</option> 
                                 <option 
                                 value="completed" 
                                 <?php echo 
                                 ($task['status'] 
                                 == 'completed' ? 
                                 'selected' : ''); 
-‎                                ?>>کامل 
-‎                                شده</option>
+                                ?>>کامل 
+                                شده</option>
                             </select> <button 
                             type="submit" 
                             name="edit_task" 
-                            class="edit-btn">ویرایش</butt
-on>
+                            class="edit-btn">ویرایش</button>
                         </form>
                         
                         <!-- Delete Button --> 
                         <form method="post" 
-                        action="">
+                        style="display:inline-block;">
                             <input type="hidden" 
                             name="task_id" 
                             value="<?php echo 
@@ -217,28 +215,34 @@ on>
         <?php else: ?> <tr> <td colspan="6" 
                 style="text-align: 
                 center;">هیچ 
-‎                وظیفه‌ای 
-‎                برای نمایش 
-‎                وجود ندارد.</td>
+                وظیفه‌ای 
+                برای نمایش 
+                وجود ندارد.</td>
             </tr> <?php endif; ?> </table> <!-- 
     Add Task Form --> <h2>افزودن 
-‎    وظیفه جدید</h2> <form 
+    وظیفه جدید</h2> <form 
     method="post">
         <input type="text" 
         name="task_description" 
         placeholder="توضیحات 
-‎        وظیفه" required><br> <input 
+        وظیفه" required><br> <input 
         type="number" name="priority" 
         placeholder="اولویت (1-3)" 
         required><br> <button type="submit" 
         name="add_task" 
         class="button">افزودن 
-‎        وظیفه</button>
+        وظیفه</button>
     </form> <!-- Button to generate PDF --> <form 
     method="GET" 
     action="https://code2024.net/generate_pdf.php">
         <button type="submit" 
         class="pdf-button">Download PDF 
         Report</button>
+    </form> <!-- Log out form --> <form 
+    method="POST" action="logout.php" 
+    style="text-align: right; margin-top: 20px;">
+        <button type="submit" 
+        class="button">خروج از 
+        سیستم</button>
     </form> </body>
 </html>
