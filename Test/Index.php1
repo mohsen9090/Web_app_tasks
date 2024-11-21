@@ -1,0 +1,341 @@
+<?php
+session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+if (!isset($_SESSION['user_uid'])) {
+    die("You need to be logged in to view this page.");
+}
+
+$servername = "gold24.io";
+$username = "new_gigar";
+$password = "new_chatgpt";
+$dbname = "accounting_db";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+$uid = $_SESSION['user_uid'];
+$search_keyword = "";
+
+// تنظیم تم در SESSION
+if (isset($_GET['theme'])) {
+    $_SESSION['theme'] = $_GET['theme'];
+}
+
+// دریافت تم از SESSION یا تنظیم پیش‌فرض
+$theme = isset($_SESSION['theme']) ? $_SESSION['theme'] : 'default';
+
+function loadTasks($conn, $uid, $search_keyword = "") {
+    $tasks = [];
+    $query = "SELECT * FROM tasks WHERE uid = ?";
+    if (!empty($search_keyword)) {
+        $query .= " AND task_description LIKE ?";
+    }
+    $stmt = $conn->prepare($query);
+    if (!empty($search_keyword)) {
+        $search_param = "%" . $search_keyword . "%";
+        $stmt->bind_param("ss", $uid, $search_param);
+    } else {
+        $stmt->bind_param("s", $uid);
+    }
+
+    if ($stmt->execute()) {
+        $result = $stmt->get_result();
+        $tasks = $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    $stmt->close();
+    return $tasks;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['search_task'])) {
+        $search_keyword = trim($_POST['search_keyword']);
+    }
+
+    if (isset($_POST['add_task'])) {
+        $task_description = trim($_POST['task_description']);
+        $priority = $_POST['priority'];
+
+        if (substr_count($task_description, "\n") > 1) {
+            die("<p style='color: red;'>توضیحات نباید بیش از دو خط باشد.</p>");
+        }
+
+        $query = "INSERT INTO tasks (uid, task_description, priority, status, created_at) VALUES (?, ?, ?, 'pending', NOW())";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("ssi", $uid, $task_description, $priority);
+        $stmt->execute();
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+
+    if (isset($_POST['edit_task'])) {
+        $task_id = $_POST['task_id'];
+        $task_description = trim($_POST['task_description']);
+        $priority = $_POST['priority'];
+        $status = $_POST['status'];
+
+        $query = "UPDATE tasks SET task_description = ?, priority = ?, status = ? WHERE id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("sisi", $task_description, $priority, $status, $task_id);
+        $stmt->execute();
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+
+    if (isset($_POST['delete_task'])) {
+        $task_id = $_POST['task_id'];
+        $query = "DELETE FROM tasks WHERE id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("i", $task_id);
+        $stmt->execute();
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+}
+
+$tasks = loadTasks($conn, $uid, $search_keyword);
+$conn->close();
+?>
+
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <title>مدیریت وظایف</title>
+    <style>
+        :root {
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --input-background: #fff;
+            --input-text-color: #333;
+        }
+
+        <?php if ($theme == 'dark') { ?>
+        :root {
+            --background-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --input-background: #2a2a2a;
+            --input-text-color: #e0e0e0;
+        }
+        <?php } elseif ($theme == 'light') { ?>
+        :root {
+            --background-color: #f8d7da;
+            --text-color: #333;
+            --input-background: #fff;
+            --input-text-color: #333;
+        }
+        <?php } elseif ($theme == 'blue') { ?>
+        :root {
+            --background-color: #e7f1ff;
+            --text-color: #333;
+            --input-background: #fff;
+            --input-text-color: #333;
+        }
+        <?php } elseif ($theme == 'green') { ?>
+        :root {
+            --background-color: #e8f5e9;
+            --text-color: #333;
+            --input-background: #fff;
+            --input-text-color: #333;
+        }
+        <?php } ?>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .header-banner {
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+        }
+        .task-form {
+            width: 80%;
+            margin: 20px auto;
+            text-align: center;
+        }
+        button, .button-link {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            margin: 5px;
+            display: inline-block;
+        }
+        .edit-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .edit-btn:hover {
+            background-color: #0056b3;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .delete-btn:hover {
+            background-color: #a71d2a;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+        }
+        .logout-btn:hover {
+            background-color: #a71d2a;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: var(--input-background);
+            color: inherit;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+            color: inherit;
+        }
+        th {
+            background: #007bff;
+            color: white;
+        }
+        .task-form input[type="text"],
+        .task-form textarea,
+        .task-form input[type="number"],
+        .task-form select {
+            background: var(--input-background);
+            color: var(--input-text-color);
+            border: 1px solid #888;
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="header-banner">مدیریت وظیفه‌ها</div>
+
+<!-- دکمه تغییر تم‌ها -->
+<div class="task-form">
+    <button type="button" onclick="location.href='?theme=default'">تم 1 (پیش‌فرض)</button>
+    <button type="button" onclick="location.href='?theme=dark'">تم 2 (تیره)</button>
+    <button type="button" onclick="location.href='?theme=light'">تم 3 (روشن)</button>
+    <button type="button" onclick="location.href='?theme=blue'">تم 4 (آبی)</button>
+    <button type="button" onclick="location.href='?theme=green'">تم 5 (سبز)</button>
+</div>
+
+<div class="task-form">
+    <form method="POST">
+        <input type="text" name="search_keyword" placeholder="عبارت جستجو" value="<?php echo htmlspecialchars($search_keyword); ?>">
+        <button class="edit-btn" type="button" onclick="playSoundThenSubmit(this.form, 'search_task')">جستجو</button>
+    </form>
+</div>
+
+<h2 style="text-align: center;">وظیفه‌های شما</h2>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>توضیحات وظیفه</th>
+        <th>اولویت</th>
+        <th>وضعیت</th>
+        <th>تاریخ ایجاد</th>
+        <th>عملیات</th>
+    </tr>
+    <?php if (!empty($tasks)): ?>
+        <?php foreach ($tasks as $task): ?>
+            <tr>
+                <td><?php echo htmlspecialchars($task['id']); ?></td>
+                <td><?php echo htmlspecialchars($task['task_description']); ?></td>
+                <td><?php echo htmlspecialchars($task['priority']); ?></td>
+                <td><?php echo htmlspecialchars($task['status']); ?></td>
+                <td><?php echo htmlspecialchars($task['created_at']); ?></td>
+                <td>
+                    <form method="POST" style="display:inline;">
+                        <input type="hidden" name="task_id" value="<?php echo htmlspecialchars($task['id']); ?>">
+                        <input type="text" name="task_description" value="<?php echo htmlspecialchars($task['task_description']); ?>" required>
+                        <input type="number" name="priority" value="<?php echo htmlspecialchars($task['priority']); ?>" required>
+                        <select name="status">
+                            <option value="pending" <?php if ($task['status'] == 'pending') echo 'selected'; ?>>در حال انتظار</option>
+                            <option value="in-progress" <?php if ($task['status'] == 'in-progress') echo 'selected'; ?>>در حال انجام</option>
+                            <option value="completed" <?php if ($task['status'] == 'completed') echo 'selected'; ?>>انجام شده</option>
+                        </select>
+                        <button class="edit-btn" type="button" onclick="playSoundThenSubmit(this.form, 'edit_task')">ویرایش</button>
+                    </form>
+                    <form method="POST" style="display:inline;">
+                        <input type="hidden" name="task_id" value="<?php echo htmlspecialchars($task['id']); ?>">
+                        <button class="delete-btn" type="button" onclick="playSoundThenSubmit(this.form, 'delete_task')">حذف</button>
+                    </form>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <tr>
+            <td colspan="6">هیچ وظیفه‌ای یافت نشد.</td>
+        </tr>
+    <?php endif; ?>
+</table>
+
+<div class="task-form">
+    <h2>افزودن وظیفه جدید</h2>
+    <form method="POST">
+        <textarea name="task_description" placeholder="توضیحات وظیفه" required></textarea><br>
+        <input type="number" name="priority" placeholder="اولویت (1-3)" required><br>
+        <button class="edit-btn" type="button" onclick="playSoundThenSubmit(this.form, 'add_task')">افزودن وظیفه</button>
+    </form>
+</div>
+
+<div class="task-form">
+    <!-- لینک دانلود PDF با پخش صدا -->
+    <a href="https://code2024.net/generate_pdf.php" target="_blank" class="button-link edit-btn" onclick="playSound()">دانلود گزارش PDF</a>
+</div>
+
+<div class="task-form">
+    <!-- دکمه خروج از سیستم -->
+    <form method="POST" action="logout.php">
+        <button class="logout-btn" type="button" onclick="playSoundThenSubmit(this.form)">خروج از سیستم</button>
+    </form>
+</div>
+
+<audio id="clickSound" src="https://code2024.net/Test/click-03.mp3" preload="auto"></audio>
+<script>
+    // پخش صدا و ارسال فرم
+    function playSound() {
+        const clickSound = document.getElementById('clickSound');
+        clickSound.pause();
+        clickSound.currentTime = 0;
+        clickSound.play();
+    }
+
+    function playSoundThenSubmit(form, actionName) {
+        const clickSound = document.getElementById('clickSound');
+        clickSound.pause();
+        clickSound.currentTime = 0;
+        clickSound.play();
+        clickSound.onended = () => {
+            if (actionName) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = actionName;
+                form.appendChild(input);
+            }
+            form.submit();
+        };
+    }
+</script>
+</body>
+</html>
