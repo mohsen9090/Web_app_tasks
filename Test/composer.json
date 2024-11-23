@@ -1,0 +1,6 @@
+{
+    "require": {
+        "morilog/jalali": "^3.4",
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
